@@ -80,20 +80,20 @@ if __FILE__ == $PROGRAM_NAME
     AGENTLIST = agentlist(RESULT)
     pp AGENTLIST
     
-    puts
+    #puts
     
-    NODEAGENTSNAME = nodeagentnamelist(RESULT) 
-    pp NODEAGENTSNAME
+    #NODEAGENTSNAME = nodeagentnamelist(RESULT) 
+    #pp NODEAGENTSNAME
     
-    puts
+    #puts
     
-    NODEAGENTS = nodeagentlist(RESULT) 
-    printf("%s =>\n", NODEAGENTS.keys[0])
-    pp NODEAGENTS[NODEAGENTS.keys[0]]
+    #NODEAGENTS = nodeagentlist(RESULT) 
+    #printf("%s =>\n", NODEAGENTS.keys[0])
+    #pp NODEAGENTS[NODEAGENTS.keys[0]]
     
-    puts
+    #puts
     
-    ADESC=agentdesc(AGENTLIST)
-    printf("%s =>\n", "rpcutil")
-    pp ADESC['rpcutil'] 
+    #ADESC=agentdesc(AGENTLIST)
+    #printf("%s =>\n", "rpcutil")
+    #pp ADESC['rpcutil'] 
 end

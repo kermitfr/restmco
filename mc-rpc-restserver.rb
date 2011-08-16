@@ -56,4 +56,3 @@ get '/mcollective/:filters/:agent/:action/*' do
 
     JSON.dump(mc.send(params[:action], arguments).map{|r| r.results})
 end
-
