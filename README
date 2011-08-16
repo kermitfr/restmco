@@ -1,22 +1,47 @@
 This project creates a simple REST server that you can use to communicate with
 mcollective (rpc communication).
 
-To execute this script you need to install these packages on your machine:
+To execute this script you'll need to install some packages on your machine :
 
 rubygem-sinatra : a light webserver in ruby
 rubygem-json : used to format the response
 rubygem-daemons : to daemonize the server 
 
-After this you can run the server, for testing, with:
+You'll find the packages on http://www.kermit.fr/repo/rpm/ 
+
+Considering that inside the rest server we call mcollective, it is necessary
+to install and launch it on a machine on which mcollective is installed and
+configured (at least as a client).
+
+See https://github.com/thinkfr/documentation 
+
+Run the server, for testing, with :
 
 ruby mc-rpc-restserver-control.rb start
 
-You can test the service with:
+Test the service on the URL :
 
 http://localhost:4567/mcollective/no-filter/rpcutil/ping/
 
-NOTE:
-Considering that inside the rest server we call mcollective, it is necessary
-to install and launch this script on a machine on which mcollective (at least as
-a client) is installed and configured.
-See https://github.com/thinkfr/documentation 
+You can then deploy the application with Apache and Phusion Passenger
+(or keep the mc-rpc-restserver-control.rb damemonizer).
+
+It has been tested on el5 with ruby 1.8.6 with these packages :
+
+mod_passenger-3.0.8-1.el5.x86_64.rpm
+rubygem-passenger-3.0.8-1.el5.x86_64.rpm
+rubygem-passenger-native-3.0.8-1.el5.x86_64.rpm
+rubygem-passenger-native-libs-3.0.8-1.el5_1.8.6.399.x86_64.rpm
+
+You'll find the packages on http://www.kermit.fr/repo/rpm/ 
+
+Check the configuration example for Apache under misc/httpd.conf
+
+Don't forget the configuration for selinux if it is set in enforcing mode.
+For example, if you put the application in /var/www/restmco :
+grep httpd /var/log/audit/audit.log | audit2allow -M passenger
+semodule -i passenger.pp
+semanage fcontext -a -t httpd_sys_content_t "/var/www/restmco(/.*)?" 
+restorecon -R /var/www/
+ls -ldZ /var/www/restmco/*
+

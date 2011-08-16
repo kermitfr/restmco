@@ -16,6 +16,10 @@ include MCollective::RPC
 #
 # Returns all the answers as a JSON data block
 
+get '/' do
+  "Hello Sinatra"
+end
+
 get '/mcollective/:filters/:agent/:action/*' do
     mc = rpcclient(params[:agent])
     mc.discover
