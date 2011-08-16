@@ -1,19 +1,22 @@
-This project create a simple REST server you can use to communicate with mcollective (rpc communication).
+This project creates a simple REST server that you can use to communicate with
+mcollective (rpc communication).
 
 To execute this script you need to install these packages on your machine:
 
-rubygem-sinatra: the simple ruby webserver
-rubygem-json: used to format the response
+rubygem-sinatra : a light webserver in ruby
+rubygem-json : used to format the response
+rubygem-daemons : to daemonize the server 
 
-After this you can run the server, for development, with:
+After this you can run the server, for testing, with:
 
-ruby mc-rpc-restserver.rb
+ruby mc-rpc-restserver-control.rb start
 
-and verify that all works well, testing this in your browser:
+You can test the service with:
 
 http://localhost:4567/mcollective/no-filter/rpcutil/ping/
 
-
 NOTE:
-Considering that inside the rest server (the file you are running) we are calling mcollective, is necessary that you install and execute this script on a machine where you have installed and configured mcollective (at least as a client).
+Considering that inside the rest server we call mcollective, it is necessary
+to install and launch this script on a machine on which mcollective (at least as
+a client) is installed and configured.
 See https://github.com/thinkfr/documentation 
