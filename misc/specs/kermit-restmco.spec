@@ -1,9 +1,9 @@
-%define gitrev 07fc434 
+%define gitrev 2e13ddf 
 
 Name:      kermit-restmco 
 Summary:   A simple REST server used to communicate with Mcollective 
 Version:   1.0
-Release:   1%{?dist}
+Release:   2%{?dist}
 License:   GPLv3
 Group:     System Tools 
 #Source0:   %{name}-%{version}.tar.gz 
@@ -41,6 +41,8 @@ mkdir -p /usr/local/bin/kermit/restmco
 %attr(0755,root,root) /etc/init.d/kermit-restmco
 
 %changelog
+* Thu Aug 18 2011 Louis Coilliot
+- enable multiple filters in one request
 * Thu Aug 18 2011 Louis Coilliot
 - Initial build
 
