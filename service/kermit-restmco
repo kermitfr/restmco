@@ -1,0 +1,99 @@
+#!/bin/sh
+#
+# kermit-restmco     A simple REST server used to communicate with Mcollective
+#
+# chkconfig: - 95 5
+# description: Enable a simple REST server used to communicate with Mcollective
+#
+
+### BEGIN INIT INFO
+# Provides:          kermit-restmco
+# Required-Start:    $network
+# Required-Stop:     $network
+# Description:       REST server
+# Short-Description: A simple REST server used to communicate with Mcollective
+### END INIT INFO
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+NAME=mc-rpc-restserver-control.rb
+CONTROL=/usr/local/bin/kermit/restmco/${NAME}
+DESC=kermit-restmco
+ROTATE_SUFFIX=
+
+LOCK_FILE=/var/lock/subsys/$NAME
+
+RETVAL=0
+set -e
+
+start_restmco () {
+    set +e
+    OUTPUT=$($CONTROL start) 
+    echo $OUTPUT | grep -q 'ERROR' 
+    STARTSTATUS=$?
+    set -e
+    case "$STARTSTATUS" in
+        1)
+            echo SUCCESS
+            if [ -n "$LOCK_FILE" ] ; then
+                touch $LOCK_FILE
+            fi
+            RETVAL=0
+            ;;
+        *)
+            echo FAILED
+            echo $OUTPUT
+            RETVAL=1
+            ;;
+    esac
+}
+
+stop_restmco () {
+        set +e
+        $CONTROL stop
+        RETVAL=$?
+        set -e
+        if [ $RETVAL = 0 ] ; then
+            echo SUCCESS
+            if [ -n "$LOCK_FILE" ] ; then
+                rm -f $LOCK_FILE
+            fi
+        else
+            echo FAILED
+        fi
+}
+
+status_restmco() {
+    set +e
+    OUTPUT=$($CONTROL status)
+    echo $OUTPUT | grep -q 'no instances running' 
+    if [ $? = 0 ] ; then
+        RETVAL=3
+    fi
+    echo $OUTPUT
+    set -e
+}
+
+restart_restmco() {
+    stop_restmco
+    start_restmco
+}
+
+case "$1" in
+    start)
+        echo -n "Starting $DESC: "
+        start_restmco
+        ;;
+    stop)
+        echo -n "Stopping $DESC: "
+        stop_restmco
+        ;;
+    status)
+        status_restmco
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|status}" >&2
+        RETVAL=1
+        ;;
+esac
+
+exit $RETVAL

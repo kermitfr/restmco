@@ -13,6 +13,6 @@ $VERBOSE = original_verbosity
 pwd = Dir.pwd
 Daemons.run_proc('mc-rpc-restserver.rb', :dir_mode => :normal, :dir => PIDDIR ) do
 Dir.chdir(pwd)
-exec "ruby mc-rpc-restserver.rb"
+exec "ruby /usr/local/bin/kermit/restmco/mc-rpc-restserver.rb"
 end 
 

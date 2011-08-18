@@ -9,6 +9,9 @@ require 'json'
 
 include MCollective::RPC
 
+uid = Etc.getpwnam("nobody").uid
+Process::Sys.setuid(uid)
+
 # http://<your box>/mcollective/rpctest/echo/msg=hello%20world
 #
 # Creates a new Simple RPC client for the 'rpctest' agent, calls
@@ -60,3 +63,4 @@ get '/mcollective/:filters/:agent/:action/*' do
 
     JSON.dump(mc.send(params[:action], arguments).map{|r| r.results})
 end
+

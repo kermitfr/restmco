@@ -32,11 +32,6 @@ mod_passenger-3.0.8-1.el5.x86_64.rpm
 rubygem-passenger-3.0.8-1.el5.x86_64.rpm
 rubygem-passenger-native-3.0.8-1.el5.x86_64.rpm
 rubygem-passenger-native-libs-3.0.8-1.el5_1.8.6.399.x86_64.rpm
-and for dependencies :
-rubygem-daemon_controller-0.2.5-1.el5.noarch.rpm
-rubygem-fastthread-1.0.7-1.el5.x86_64.rpm
-rubygem-rack-1.1.0-2.el5.noarch.rpm
-rubygem-rake-0.8.7-2.el5.noarch.rpm
 
 You'll find the packages on http://www.kermit.fr/repo/rpm/ 
 
