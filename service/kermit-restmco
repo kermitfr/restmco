@@ -87,11 +87,15 @@ case "$1" in
         echo -n "Stopping $DESC: "
         stop_restmco
         ;;
+    restart)
+        echo -n "Restarting $DESC: "
+        restart_restmco
+        ;;
     status)
         status_restmco
         ;;
     *)
-        echo "Usage: $0 {start|stop|status}" >&2
+        echo "Usage: $0 {start|stop|status|restart}" >&2
         RETVAL=1
         ;;
 esac
