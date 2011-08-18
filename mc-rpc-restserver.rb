@@ -28,12 +28,9 @@ get '/mcollective/:filters/:agent/:action/*' do
     mc.discover
 
     if params[:filters] && params[:filters] != 'no-filter' then
-    	filters = {}
-   	params[:filters].split(';').each do |filter|
-        	filters[$1.to_sym] = $2 if filter =~ /^(.+?)=(.+)$/
-    	end
 
-    	filters.each do|name,value|
+	params[:filters].split(';').each do |filter|
+		name,value = $1, $2 if filter =~ /^(.+?)=(.+)$/
 		puts "#{name}: #{value}"
         	if name == 'class_filter' then
    			puts "Applying class_filter"
