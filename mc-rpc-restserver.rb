@@ -2,6 +2,9 @@
 # for Simple RPC clients that takes requests over HTTP
 # and returns results as JSON structures.
 
+# Inspired with mcollective/ext/mc-rpc-restserver.rb demo
+# in the Mcollective source code
+
 # Copyright (C) 2011 Marco Mornati (mornatim at gmail.com)
 # Copyright (C) 2011 Louis Coilliot (louis.coilliot at gmail.com)
 #
@@ -27,7 +30,8 @@ include MCollective::RPC
 uid = Etc.getpwnam("nobody").uid
 Process::Sys.setuid(uid)
 
-# http://<your box>/mcollective/rpctest/echo/msg=hello%20world
+# http://<your box>:4567/mcollective/no-filter/rpcutil/ping/
+# http://<your box>:4567/mcollective/no-filter/package/status/package=bash
 #
 # Creates a new Simple RPC client for the 'rpctest' agent, calls
 # the echo action with a message 'hello world'.
