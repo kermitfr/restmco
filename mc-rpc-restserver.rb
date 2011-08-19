@@ -30,11 +30,9 @@ include MCollective::RPC
 uid = Etc.getpwnam("nobody").uid
 Process::Sys.setuid(uid)
 
+# Examples :
 # http://<your box>:4567/mcollective/no-filter/rpcutil/ping/
 # http://<your box>:4567/mcollective/no-filter/package/status/package=bash
-#
-# Creates a new Simple RPC client for the 'rpctest' agent, calls
-# the echo action with a message 'hello world'.
 #
 # Returns all the answers as a JSON data block
 
