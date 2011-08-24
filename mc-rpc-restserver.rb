@@ -43,7 +43,6 @@ get '/mcollective/:filters/:agent/:action/*' do
     mc.discover
 
     if params[:filters] && params[:filters] != 'no-filter' then
-
 	params[:filters].split(';').each do |filter|
 		name,value = $1, $2 if filter =~ /^(.+?)=(.+)$/
 		puts "#{name}: #{value}"
@@ -57,7 +56,7 @@ get '/mcollective/:filters/:agent/:action/*' do
 			puts "Applying agent_filter"
         	elsif name == 'limit_targets' then
 			puts "Applying limit_targets"
-			mc.limit_targets "#{value}"
+			mc.limit_targets="#{value}"
         	elsif name == 'identity_filter' then
 			puts "Applying identity_filter"
 			mc.identity_filter "#{value}"
