@@ -3,7 +3,7 @@
 Name:      kermit-restmco 
 Summary:   A simple REST server used to communicate with Mcollective 
 Version:   1.0
-Release:   3%{?dist}
+Release:   4%{?dist}
 License:   GPLv3
 Group:     System Tools 
 #Source0:   %{name}-%{version}.tar.gz 
@@ -41,6 +41,8 @@ mkdir -p /usr/local/bin/kermit/restmco
 %attr(0755,root,root) /etc/init.d/kermit-restmco
 
 %changelog
+* Wed Aug 24 2011 Louis Coilliot 
+- fixed problem with limit filter
 * Sat Aug 20 2011 Louis Coilliot
 - credits and improved comments
 * Thu Aug 18 2011 Louis Coilliot
