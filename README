@@ -1,10 +1,27 @@
 This project creates a simple REST server that you can use to communicate with
-mcollective (rpc communication).
+MCollective (rpc communication).
+
+You can reach MCollective with URLs like :
+
+http://yourserver:4567/mcollective/no-filter/rpcutil/ping/
+http://yourserver/mcollective/no-filter/rpcutil/ping/
+
+The syntax is /mcollective/filters/agent/action/args
+
+Depending on if you use Sinatra as a standalone service or through Apache and
+Passenger.
+
+Other examples of use:
+GET /mcollective/no-filter/package/status/package=bash
+GET /mcollective/identity_filter=myhost01/rpcutil/get_fact/fact=rubyversion
+GET /mcollective/class_filter=infra;class_filter=development/service/status/service=sshd
+GET /mcollective/identity_filter=myhost01/oasagent/redeploy/appname=myapp;instancename=OC4J_APP01;appfile=myapp-2.14.ear
+GET /mcollective/limit_targets=1/agentinfo/desc/agentname=service
 
 To execute this script you'll need to install some packages on your machine :
 
 rubygem-sinatra : a light webserver in ruby
-rubygem-json : used to format the response
+rubygem-json    : used to format the response
 rubygem-daemons : to daemonize the server 
 
 You'll find the packages on http://www.kermit.fr/repo/rpm/ 
