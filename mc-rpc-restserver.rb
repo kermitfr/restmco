@@ -65,9 +65,13 @@ get '/mcollective/:filters/:agent/:action/*' do
 		end
     	end
     end
+
     arguments = {}
-    params[:splat].each do |arg|
-        arguments[$1.to_sym] = $2 if arg =~ /^(.+?)=(.+)$/
+
+    params[:splat].each do |args|
+        args.split(';').each do |arg|
+            arguments[$1.to_sym] = $2 if arg =~ /^(.+?)=(.+)$/
+        end
     end
 
     arguments.each do|name,value|
