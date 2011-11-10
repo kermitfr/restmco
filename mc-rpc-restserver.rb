@@ -47,22 +47,35 @@ get '/mcollective/:filters/:agent/:action/*' do
     if params[:filters] && params[:filters] != 'no-filter' then
 	params[:filters].split(';').each do |filter|
 		name,value = $1, $2 if filter =~ /^(.+?)=(.+)$/
-		puts "#{name}: #{value}"
+		    puts "#{name}: #{value}"
         	if name == 'class_filter' then
-   			puts "Applying class_filter"
+   			    puts "Applying class_filter"
         		mc.class_filter "/#{value}/"
         	elsif name == 'fact_filter' then
-			puts "Applying fact_filter"
-                	mc.fact_filter "#{value}"
+			    puts "Applying fact_filter"
+                mc.fact_filter "#{value}"
         	elsif name == 'agent_filter' then
-			puts "Applying agent_filter"
+			    puts "Applying agent_filter"
         	elsif name == 'limit_targets' then
-			puts "Applying limit_targets"
-			mc.limit_targets="#{value}"
+			    puts "Applying limit_targets"
+			    mc.limit_targets="#{value}"
         	elsif name == 'identity_filter' then
-			puts "Applying identity_filter"
-			mc.identity_filter "#{value}"
-		end
+			    puts "Applying identity_filter"
+                value_list = value.split('_OR_')
+                if value_list.length > 1
+                    regex_string = "/"
+                    value_list.each_with_index do |o,i|
+                        if i != 0 then
+                            regex_string << '|'
+                        end
+                        regex_string << o
+                    end
+                    regex_string << "/"
+                    mc.identity_filter "#{regex_string}"
+                else
+                    mc.identity_filter "#{value}"
+                end
+		    end
     	end
     end
 
