@@ -3,8 +3,8 @@ MCollective (rpc communication).
 
 You can reach MCollective with URLs like :
 
-http://yourserver:4567/mcollective/no-filter/rpcutil/ping/
-http://yourserver/mcollective/no-filter/rpcutil/ping/
+http://yourserver:4567/mcollective/no-filter/rpcutil/ping/ # Sinatra standalone
+http://yourserver/mcollective/no-filter/rpcutil/ping/ # Passenger
 
 The syntax is /mcollective/filters/agent/action/args
 
@@ -13,10 +13,11 @@ Passenger.
 
 Other examples of use:
 GET /mcollective/no-filter/package/status/package=bash
-GET /mcollective/identity_filter=myhost01/rpcutil/get_fact/fact=rubyversion
+GET /mcollective/identity_filter=host01/rpcutil/get_fact/fact=rubyversion
 GET /mcollective/class_filter=infra;class_filter=development/service/status/service=sshd
-GET /mcollective/identity_filter=myhost01/oasagent/redeploy/appname=myapp;instancename=OC4J_APP01;appfile=myapp-2.14.ear
+GET /mcollective/identity_filter=host01/oasagent/redeploy/appname=myapp;instancename=OC4J_APP01;appfile=myapp-2.14.ear
 GET /mcollective/limit_targets=1/agentinfo/desc/agentname=service
+GET /mcollective/identity_filter=host01_OR_host02/rpcutil/ping/
 
 To execute this script you'll need to install some packages on your machine :
 
