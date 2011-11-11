@@ -3,7 +3,7 @@
 # and returns results as JSON structures.
 
 # Inspired with mcollective/ext/mc-rpc-restserver.rb demo
-# in the Mcollective source code
+# in the MCollective source code
 
 # Copyright (C) 2011 Marco Mornati (mornatim at gmail.com)
 # Copyright (C) 2011 Louis Coilliot (louis.coilliot at gmail.com)
@@ -37,7 +37,7 @@ Process::Sys.setuid(uid)
 # Returns all the answers as a JSON data block
 
 get '/' do
-  "Hello Sinatra"
+    "Hello Sinatra"
 end
 
 get '/mcollective/:filters/:agent/:action/*' do
@@ -45,22 +45,22 @@ get '/mcollective/:filters/:agent/:action/*' do
     mc.discover
 
     if params[:filters] && params[:filters] != 'no-filter' then
-	params[:filters].split(';').each do |filter|
-		name,value = $1, $2 if filter =~ /^(.+?)=(.+)$/
-		    puts "#{name}: #{value}"
-        	if name == 'class_filter' then
-   			    puts "Applying class_filter"
-        		mc.class_filter "/#{value}/"
-        	elsif name == 'fact_filter' then
-			    puts "Applying fact_filter"
+        params[:filters].split(';').each do |filter|
+            name,value = $1, $2 if filter =~ /^(.+?)=(.+)$/
+            puts "#{name}: #{value}"
+            if name == 'class_filter' then
+                puts "Applying class_filter"
+                mc.class_filter "/#{value}/"
+            elsif name == 'fact_filter' then
+                puts "Applying fact_filter"
                 mc.fact_filter "#{value}"
-        	elsif name == 'agent_filter' then
-			    puts "Applying agent_filter"
-        	elsif name == 'limit_targets' then
-			    puts "Applying limit_targets"
-			    mc.limit_targets="#{value}"
-        	elsif name == 'identity_filter' then
-			    puts "Applying identity_filter"
+            elsif name == 'agent_filter' then
+                puts "Applying agent_filter"
+            elsif name == 'limit_targets' then
+                puts "Applying limit_targets"
+                mc.limit_targets="#{value}"
+            elsif name == 'identity_filter' then
+                puts "Applying identity_filter"
                 value_list = value.split('_OR_')
                 if value_list.length > 1
                     regex_string = "/"
@@ -75,8 +75,8 @@ get '/mcollective/:filters/:agent/:action/*' do
                 else
                     mc.identity_filter "#{value}"
                 end
-		    end
-    	end
+            end
+        end
     end
 
     arguments = {}
@@ -88,7 +88,7 @@ get '/mcollective/:filters/:agent/:action/*' do
     end
 
     arguments.each do|name,value|
-    	puts "#{name}: #{value}"
+        puts "#{name}: #{value}"
     end
 
     JSON.dump(mc.send(params[:action], arguments).map{|r| r.results})
