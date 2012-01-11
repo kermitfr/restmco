@@ -20,6 +20,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Examples :
+# http://<your box>:4567/mcollective/no-filter/rpcutil/ping/
+# http://<your box>:4567/mcollective/no-filter/package/status/package=bash
+#
+# GET /mcollective/class_filter=retail;class_filter=stores/package/status/package=bash
+#
+# Returns all the answers as a JSON data block
+
 require 'rubygems'
 require 'sinatra'
 require 'mcollective'
@@ -30,67 +38,75 @@ include MCollective::RPC
 uid = Etc.getpwnam("nobody").uid
 Process::Sys.setuid(uid)
 
-# Examples :
-# http://<your box>:4567/mcollective/no-filter/rpcutil/ping/
-# http://<your box>:4567/mcollective/no-filter/package/status/package=bash
-#
-# Returns all the answers as a JSON data block
 
-get '/' do
-    "Hello Sinatra"
-end
-
-get '/mcollective/:filters/:agent/:action/*' do
-    mc = rpcclient(params[:agent])
-    mc.discover
-
+def set_filters(mc, params)
     if params[:filters] && params[:filters] != 'no-filter' then
         params[:filters].split(';').each do |filter|
             name,value = $1, $2 if filter =~ /^(.+?)=(.+)$/
             puts "#{name}: #{value}"
-            if name == 'class_filter' then
+            case name
+            when 'class_filter'
                 puts "Applying class_filter"
                 mc.class_filter "/#{value}/"
-            elsif name == 'fact_filter' then
+            when 'fact_filter'
                 puts "Applying fact_filter"
                 mc.fact_filter "#{value}"
-            elsif name == 'agent_filter' then
+            when 'agent_filter'
                 puts "Applying agent_filter"
-            elsif name == 'limit_targets' then
+            when 'limit_targets'
                 puts "Applying limit_targets"
-                mc.limit_targets="#{value}"
-            elsif name == 'identity_filter' then
+                mc.limit_targets = "#{value}"
+            when 'identity_filter'
                 puts "Applying identity_filter"
-                value_list = value.split('_OR_')
-                if value_list.length > 1
-                    regex_string = "/"
-                    value_list.each_with_index do |o,i|
-                        if i != 0 then
-                            regex_string << '|'
-                        end
-                        regex_string << o
-                    end
-                    regex_string << "/"
-                    mc.identity_filter "#{regex_string}"
-                else
-                    mc.identity_filter "#{value}"
-                end
+                mc.identity_filter "#{id_filter(value)}"
             end
         end
     end
+end
 
+def id_filter(value)
+   value_list = value.split('_OR_')
+   if value_list.length > 1
+       regex_string = "/"
+       value_list.each_with_index do |o,i|
+           if i != 0 then
+               regex_string << '|'
+           end
+           regex_string << o
+       end
+       regex_string << "/"
+       return "#{regex_string}"
+   end 
+   "#{value}"
+end 
+
+def arg_parse(params)
     arguments = {}
-
     params[:splat].each do |args|
         args.split(';').each do |arg|
             arguments[$1.to_sym] = $2 if arg =~ /^(.+?)=(.+)$/
         end
     end
+    arguments
+end
 
-    arguments.each do|name,value|
-        puts "#{name}: #{value}"
-    end
 
+get '/' do
+    "Hello Sinatra"
+end
+
+
+#get '/schedule/:schedtype/:schedarg/:filters/:agent/:action/*' do
+#
+#end
+
+
+get '/mcollective/:filters/:agent/:action/*' do
+    mc = rpcclient(params[:agent])
+    mc.discover
+    set_filters(mc, params)
+    arguments = arg_parse(params)
+    arguments.each  { |name,value| puts "#{name}: #{value}" }
     JSON.dump(mc.send(params[:action], arguments).map{|r| r.results})
 end
 
