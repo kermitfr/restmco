@@ -98,23 +98,36 @@ end
 # GET /schedule/in/0s/no-filter/rpcutil/ping/
 # GET /schedule/in/60s/identity_filter=el4/package/status/package=bash
 get '/schedule/:schedtype/:schedarg/:filters/:agent/:action/*' do
-   params[:schedtype] ||='in'
-   params[:schedarg]  ||='0s'
-   jobreq = { :agentname  => params[:agent],
-              :actionname => params[:action],
-              :schedtype  => params[:schedtype],
-              :schedarg   => params[:schedarg] }
-   sched = rpcclient("scheduler")
-   set_filters(sched, params)
-   arguments = arg_parse(params)
-   arguments.each  { |name,value| puts "#{name}: #{value}" }
-   unless arguments.empty?
-      jobreq[:params] = arguments.keys.join(",")
-      jobreq.merge!(arguments)
-   end
-   JSON.dump(sched.schedule(jobreq).map{|r| r.results})
+    params[:schedtype] ||='in'
+    params[:schedarg]  ||='0s'
+    jobreq = { :agentname  => params[:agent],
+               :actionname => params[:action],
+               :schedtype  => params[:schedtype],
+               :schedarg   => params[:schedarg] }
+    sched = rpcclient("scheduler")
+    set_filters(sched, params)
+    arguments = arg_parse(params)
+    arguments.each  { |name,value| puts "#{name}: #{value}" }
+    unless arguments.empty?
+       jobreq[:params] = arguments.keys.join(",")
+       jobreq.merge!(arguments)
+    end
+    JSON.dump(sched.schedule(jobreq).map{|r| r.results})
 end
 
+get '/schedstatus/:jobid' do
+   jobreq = { :jobid => params[:jobid] }
+   sched = rpcclient("scheduler")
+   set_filters(sched, params)
+   JSON.dump(sched.query(jobreq).map{|r| r.results})
+end
+
+get '/schedoutput/:jobid' do
+   jobreq = { :jobid => params[:jobid], :output => 'yes' }
+   sched = rpcclient("scheduler")
+   set_filters(sched, params)
+   JSON.dump(sched.query(jobreq).map{|r| r.results})
+end
 
 get '/mcollective/:filters/:agent/:action/*' do
     mc = rpcclient(params[:agent])
