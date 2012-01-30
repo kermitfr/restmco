@@ -115,14 +115,14 @@ get '/schedule/:schedtype/:schedarg/:filters/:agent/:action/*' do
     JSON.dump(sched.schedule(jobreq).map{|r| r.results})
 end
 
-get '/schedstatus/:jobid' do
+get '/schedstatus/:jobid/:filters' do
    jobreq = { :jobid => params[:jobid] }
    sched = rpcclient("scheduler")
    set_filters(sched, params)
    JSON.dump(sched.query(jobreq).map{|r| r.results})
 end
 
-get '/schedoutput/:jobid' do
+get '/schedoutput/:jobid/:filters' do
    jobreq = { :jobid => params[:jobid], :output => 'yes' }
    sched = rpcclient("scheduler")
    set_filters(sched, params)
