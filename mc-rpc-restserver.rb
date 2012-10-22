@@ -70,6 +70,7 @@ require 'mcollective'
 require 'json'
 require 'logger'
 require 'inifile'
+require 'fileutils'
 
 include MCollective::RPC
 
