@@ -94,6 +94,7 @@ Process::Sys.setuid(uid)
 logger = Logger.new(STDERR)
 logger = Logger.new(STDOUT)
 logger = Logger.new(LOG_FILE, 'daily')
+
 case LOG_LEVEL
     when 'DEBUG'
         logger.level = Logger::DEBUG
@@ -107,36 +108,31 @@ end
 
 logger.debug "Starting Kermit-RestMCO"
 
-def set_filters(mc, params)
+def set_filters(mc, params, logger)
     if params[:filters] then
         logger.info "Applying filters"
         params[:filters].each do |filter_type, filter_values|
             logger.debug "#{filter_type}: #{filter_values}"
-            case name
+            case filter_type
             when 'class'
-                puts "Applying class_filter"
+                logger.debug "Applying class_filter"
                 filter_values.each do |value|
                     mc.class_filter "/#{value}/"
                 end
             when 'fact'
-                puts "Applying fact_filter"
+                logger.debug "Applying fact_filter"
                 filter_values.each do |value|
                     mc.fact_filter "#{value}"
                 end
             when 'agent'
-                puts "Applying agent_filter"
-            #when 'limit'
-            #    puts "Applying limit_targets"
-            #    filter_values.each do |value|
-            #        mc.limit_targets = "#{value}"
-            #    end
+                logger.debug "Applying agent_filter"
             when 'identity'
-                puts "Applying identity_filter"
+                logger.debug "Applying identity_filter"
                 filter_values.each do |value|
                     mc.identity_filter "#{value}"
                 end
             when 'compound'
-                puts "Applying compound_filter"
+                logger.debug "Applying compound_filter"
                 filter_values.each do |value|
                     mc.compound "#{value}"
                 end
@@ -165,26 +161,30 @@ get '/' do
     "Hello Sinatra"
 end
 
-get '/schedstatus/:jobid/:filters' do
+post '/schedstatus/:jobid/' do
     content_type :json
     logger.debug "Calling /schedstatus url"
     jobreq = { :jobid => params[:jobid] }
     sched = rpcclient("scheduler")
-    set_filters(sched, params)
+    data = JSON.parse(request.body.read)
+    data = recursive_symbolize_keys(data)
+    set_filters(sched, data, logger)
     json_response = JSON.dump(sched.query(jobreq).map{|r| r.results})
-    logger.info "Command schedstatus #{params[:jobid]} executed on filters #{params[:filters]}"
+    logger.info "Command schedstatus #{params[:jobid]} executed on filters #{data[:filters]}"
     logger.debug "Response received: #{json_response}"
     json_response
 end
 
-get '/schedoutput/:jobid/:filters' do   
+post '/schedoutput/:jobid/' do   
     content_type :json
     logger.debug "Calling /schedoutput url"
     jobreq = { :jobid => params[:jobid], :output => 'yes' }
     sched = rpcclient("scheduler")
-    set_filters(sched, params)
+    data = JSON.parse(request.body.read)
+    data = recursive_symbolize_keys(data)
+    set_filters(sched, data, logger)
     json_response = JSON.dump(sched.query(jobreq).map{|r| r.results})
-    logger.info "Command scheoutput #{params[:jobid]} executed on filters: #{params[:filters]}"
+    logger.info "Command scheoutput #{params[:jobid]} executed on filters: #{data[:filters]}"
     logger.debug "Response received: #{json_response}"
     json_response
 end
@@ -205,8 +205,8 @@ post '/mcollective/:agent/:action/' do
                    :schedtype  => scheduler_data[:schedtype],
                    :schedarg   => scheduler_data[:schedarg] }
         sched = rpcclient("scheduler")
-        set_filters(sched, params)
-        unless arguments.empty?
+        set_filters(sched, params, logger)
+        unless data[:parameters].nil? or data[:parameters].empty?
             jobreq[:params] = data[:parameters].keys.join(",")
             jobreq.merge!(data[:parameters])
         end
@@ -217,7 +217,7 @@ post '/mcollective/:agent/:action/' do
     else
         mc = rpcclient(params[:agent])
         mc.discover
-        set_filters(mc, params)
+        set_filters(mc, params, logger)
         if data[:parameters]
             data[:parameters].each  { |name,value| puts "#{name}: #{value}" }
         end
