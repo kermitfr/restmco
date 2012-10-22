@@ -191,10 +191,15 @@ end
 
 post '/mcollective/:agent/:action/' do
     content_type :json
-    logger.debug "Calling /mcollective url"
-    data = JSON.parse(request.body.read)
-    data = recursive_symbolize_keys(data)
-    logger.debug "JSON Data: #{data}"
+    logger.debug "Calling /mcollective url Agent: #{params[:agent]} Action:#{params[:action]}"
+    if request.body.nil?
+        data = JSON.parse(request.body.read)
+        data = recursive_symbolize_keys(data)
+        logger.debug "JSON Data: #{data}"
+    else
+        data = {}
+    end
+
     if data[:schedule] then
         logger.info "Executing with backend scheduler"
         scheduler_data=data[:schedule]
