@@ -75,7 +75,7 @@ require 'fileutils'
 include MCollective::RPC
 
 def getkey(section, key)
-    ini=IniFile.load('/etc/sysconfig/kermit-restmco', :comment => '#')
+    ini=IniFile.load('/etc/kermit/kermit-restmco.cfg', :comment => '#')
     params = ini[section]
     params[key]
 end

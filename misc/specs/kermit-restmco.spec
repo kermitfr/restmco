@@ -24,11 +24,11 @@ A simple REST server in ruby and sinatra, used to communicate with Mcollective
 rm -rf %{buildroot}
 install -d -m 755 %{buildroot}/usr/local/bin/kermit/restmco/
 install -d -m 755 %{buildroot}/etc/init.d
-install -d -m 755 %{buildroot}/etc/sysconfig
+install -d -m 755 %{buildroot}/etc/kermit
 install mc-rpc-restserver.rb %{buildroot}/usr/local/bin/kermit/restmco
 install mc-rpc-restserver-control.rb %{buildroot}/usr/local/bin/kermit/restmco
 install service/init.d/kermit-restmco %{buildroot}/etc/init.d 
-install service/sysconfig/kermit-restmco %{buildroot}/etc/sysconfig
+install service/sysconfig/kermit-restmco.cfg %{buildroot}/etc/kermit
 
 %clean
 rm -rf %{buildroot}
@@ -41,7 +41,7 @@ mkdir -p /usr/local/bin/kermit/restmco
 %attr(0755, root, root) /usr/local/bin/kermit/restmco/mc-rpc-restserver-control.rb
 /usr/local/bin/kermit/restmco/mc-rpc-restserver.rb
 %attr(0755,root,root) /etc/init.d/kermit-restmco
-%attr(0755,root,root) /etc/sysconfig/kermit-restmco
+%config(noreplace) %attr(0755,root,root) /etc/kermit/kermit-restmco.cfg
 
 %changelog
 * Mon Oct 22 2012 Marco Mornati
