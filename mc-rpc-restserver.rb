@@ -166,8 +166,7 @@ post '/schedstatus/:jobid/' do
     logger.debug "Calling /schedstatus url"
     jobreq = { :jobid => params[:jobid] }
     sched = rpcclient("scheduler")
-    data = JSON.parse(request.body.read)
-    data = recursive_symbolize_keys(data)
+    data = request.body.nil? ? {} : recursive_symbolize_keys(JSON.parse(request.body.read))
     set_filters(sched, data, logger)
     json_response = JSON.dump(sched.query(jobreq).map{|r| r.results})
     logger.info "Command schedstatus #{params[:jobid]} executed on filters #{data[:filters]}"
@@ -180,8 +179,7 @@ post '/schedoutput/:jobid/' do
     logger.debug "Calling /schedoutput url"
     jobreq = { :jobid => params[:jobid], :output => 'yes' }
     sched = rpcclient("scheduler")
-    data = JSON.parse(request.body.read)
-    data = recursive_symbolize_keys(data)
+    data = request.body.nil? ? {} : recursive_symbolize_keys(JSON.parse(request.body.read))
     set_filters(sched, data, logger)
     json_response = JSON.dump(sched.query(jobreq).map{|r| r.results})
     logger.info "Command scheoutput #{params[:jobid]} executed on filters: #{data[:filters]}"
@@ -192,14 +190,8 @@ end
 post '/mcollective/:agent/:action/' do
     content_type :json
     logger.debug "Calling /mcollective url Agent: #{params[:agent]} Action:#{params[:action]}"
-    if request.body.nil?
-        data = JSON.parse(request.body.read)
-        data = recursive_symbolize_keys(data)
-        logger.debug "JSON Data: #{data}"
-    else
-        data = {}
-    end
-
+    data = request.body.nil? ? {} : recursive_symbolize_keys(JSON.parse(request.body.read))
+    logger.debug "JSON Data: #{data}"
     if data[:schedule] then
         logger.info "Executing with backend scheduler"
         scheduler_data=data[:schedule]
