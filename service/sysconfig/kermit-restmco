@@ -1,0 +1,3 @@
+[logger]
+LOG_FILE=/tmp/kermit-restmco.log
+LOG_LEVEL=INFO
