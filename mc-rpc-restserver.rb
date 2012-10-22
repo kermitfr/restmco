@@ -166,6 +166,7 @@ get '/' do
 end
 
 get '/schedstatus/:jobid/:filters' do
+    content_type :json
     logger.debug "Calling /schedstatus url"
     jobreq = { :jobid => params[:jobid] }
     sched = rpcclient("scheduler")
@@ -176,7 +177,8 @@ get '/schedstatus/:jobid/:filters' do
     json_response
 end
 
-get '/schedoutput/:jobid/:filters' do
+get '/schedoutput/:jobid/:filters' do   
+    content_type :json
     logger.debug "Calling /schedoutput url"
     jobreq = { :jobid => params[:jobid], :output => 'yes' }
     sched = rpcclient("scheduler")
@@ -188,6 +190,7 @@ get '/schedoutput/:jobid/:filters' do
 end
 
 post '/mcollective/:agent/:action/' do
+    content_type :json
     logger.debug "Calling /mcollective url"
     data = JSON.parse(request.body.read)
     data = recursive_symbolize_keys(data)
