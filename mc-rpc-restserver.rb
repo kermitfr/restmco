@@ -1,4 +1,4 @@
-# A very simple demonstration of writing a REST server
+# A very simple REST server
 # for Simple RPC clients that takes requests over HTTP
 # and returns results as JSON structures.
 
@@ -22,13 +22,13 @@
 
 # Examples :
 # http://<your box>:4567/mcollective/rpcutil/ping/
-# JSON Available Values:
+# JSON structure :
 #{
 # filters: {
-#   class: [value,value],
-#   identity: [value]
-#   fact: [],
-#   agent: [],
+#   class: ["c1", "c2"],
+#   identity: ["i1", "i2"]
+#   fact: [ "f1=foo","f2=bar"],
+#   agent: [ "a1", "a2"],
 #   compound: value
 # },
 # parameters: {
@@ -45,9 +45,10 @@
 # }
 #}
 #
+# Example 1
 #
 # POST /mcollective/package/status/
-# JSON Obj in POST:
+# JSON body in POST:
 # {
 #    "filters": {
 #        "class": ['retail', 'stores']
@@ -57,12 +58,19 @@
 #    }
 # }
 #
+# Example 2
+#
 # POST /mcollective/service/status/
-# JSON Obj:
+# JSON body :
 # {"parameters": {"service":"sshd"}, "limit": {"targets":"1"}}
-# of with filters
+#
+# Example 3
+#
+# POST /mcollective/service/status/
+# JSON body :
 # {"filters":{"identity":["notebook", "el6"]}, "parameters": {"service":"sshd"}, "limit": {"targets":"1"}}
-# Returns all the answers as a JSON data block
+#
+# Returns all the answers as a JSON document
 
 require 'rubygems'
 require 'sinatra'
