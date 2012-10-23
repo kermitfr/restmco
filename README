@@ -13,27 +13,27 @@ The syntax is /mcollective/agent/action/ with a POST request
 
 Examples of use:
 
-POST on http://localhost/mcollective/rpcutil/ping/, 
+POST on http://yourserver/mcollective/rpcutil/ping/, 
 With Content-Type = "application/json", 
 With POST body = {"filters":{"identity":["el5.labolinux.fr","el6.labolinux.fr"]}}
 
-POST on http://localhost/mcollective/rpcutil/ping/
+POST on http://yourserver/mcollective/rpcutil/ping/
 With Content-Type = "application/json"
 With POST body = {"filters":{"fact":["rubyversion=1.8.7"]}}
 
-POST on http://localhost/mcollective/rpcutil/ping/
+POST on http://yourserver/mcollective/rpcutil/ping/
 With Content-Type = "application/json"
 With POST body = {"limit":{"method":"random","targets":1},"filters":{}}
 
-POST on http://localhost/mcollective/package/status/
+POST on http://yourserver/mcollective/package/status/
 With Content-Type = "application/json"
 With POST body = {"filters":{"class":["postgresql-server"]},"parameters":{"package":"postgresql"}}
 
-POST on http://localhost/mcollective/package/status/
+POST on http://yourserver/mcollective/package/status/
 With Content-Type = "application/json"
 With POST body = {"filters":{"compound":"(operatingsystem=CentOS and !operatingsystemrelease=6.3)"},"parameters":{"package":"bash"}}
 
-POST on http://localhost/mcollective/service/status/, 
+POST on http://yourserver/mcollective/service/status/, 
 With Content-Type = "application/json", 
 With POST body = {"filters":{"identity":["el5.labolinux.fr"],"class":["postgresql-server"]},"parameters":{"service":"sshd"}}
 
@@ -57,7 +57,7 @@ ruby mc-rpc-restserver-control.rb start
 
 Test the service on the URL :
 
-http://localhost:4567/mcollective/rpcutil/ping/
+http://yourserver:4567/mcollective/rpcutil/ping/
 
 You can then deploy the application with Apache and Phusion Passenger
 (or keep the mc-rpc-restserver-control.rb daemonizer).
