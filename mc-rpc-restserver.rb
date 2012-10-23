@@ -74,6 +74,34 @@ require 'fileutils'
 
 include MCollective::RPC
 
+class Hash
+  def symbolize_keys
+    inject({}) do |options, (key, value)|
+      options[(key.to_sym rescue key) || key] = value
+      options
+    end
+  end
+
+  def symbolize_keys!
+     self.replace(self.symbolize_keys)
+  end
+
+  def recursive_symbolize_keys!
+      symbolize_keys!
+      # symbolize each hash in .values
+      values.each{|h| h.recursive_symbolize_keys! if h.is_a?(Hash) }
+      # symbolize each hash inside an array in .values
+      values.select{|v| v.is_a?(Array) }.flatten.each{|h|
+      h.recursive_symbolize_keys! if h.is_a?(Hash) }
+      self
+  end
+end
+
+def recursive_symbolize_keys! hash
+    hash.symbolize_keys!
+    hash.values.select{|v| v.is_a? Hash}.each{|h| recursive_symbolize_keys!(h)}
+end
+
 def getkey(section, key)
     ini=IniFile.load('/etc/kermit/kermit-restmco.cfg', :comment => '#')
     params = ini[section]
@@ -111,51 +139,37 @@ logger.debug "Starting Kermit-RestMCO"
 
 def set_filters(mc, params, logger)
     if params[:filters] then
-        logger.info "Applying filters"
         params[:filters].each do |filter_type, filter_values|
             logger.debug "#{filter_type}: #{filter_values}"
             case filter_type
-            when 'class'
+            when :class
                 logger.debug "Applying class_filter"
                 filter_values.each do |value|
                     mc.class_filter "/#{value}/"
                 end
-            when 'fact'
+            when :fact
                 logger.debug "Applying fact_filter"
                 filter_values.each do |value|
                     mc.fact_filter "#{value}"
                 end
-            when 'agent'
+            when :agent
                 logger.debug "Applying agent_filter"
-            when 'identity'
+            when :identity
                 logger.debug "Applying identity_filter"
                 filter_values.each do |value|
+                    logger.info('Id value :')
+                    logger.info(value)
                     mc.identity_filter "#{value}"
                 end
-            when 'compound'
+            when :compound
                 logger.debug "Applying compound_filter"
-                filter_values.each do |value|
-                    mc.compound "#{value}"
-                end
+                logger.debug "compound : #{filter_values}"
+                mc.compound "#{filter_values}"
             end
         end
     end
 end
 
-def recursive_symbolize_keys(h)
-  case h
-  when Hash
-    Hash[
-      h.map do |k, v|
-        [ k.respond_to?(:to_sym) ? k.to_sym : k, recursive_symbolize_keys(v) ]
-      end
-    ]
-  when Enumerable
-    h.map { |v| recursive_symbolize_keys(v) }
-  else
-    h
-  end
-end
 
 get '/' do
     logger.debug "Calling / url"
@@ -194,8 +208,9 @@ post '/mcollective/:agent/:action/' do
     content_type :json
     logger.debug "Calling /mcollective url Agent: #{params[:agent]} Action:#{params[:action]}"
     body_content = request.body.read
-    data = (body_content.nil? or body_content.empty?) ? {} : recursive_symbolize_keys(JSON.parse(body_content))
-    logger.debug "JSON Data: #{data}"
+    data = (body_content.nil? or body_content.empty?) ? {} : JSON.parse(body_content)
+    data.recursive_symbolize_keys!
+    logger.debug "JSON Data: #{JSON.dump(data)}"
     if data[:schedule] then
         logger.info "Executing with backend scheduler"
         scheduler_data=data[:schedule]
@@ -206,7 +221,7 @@ post '/mcollective/:agent/:action/' do
                    :schedtype  => scheduler_data[:schedtype],
                    :schedarg   => scheduler_data[:schedarg] }
         sched = rpcclient("scheduler")
-        set_filters(sched, params, logger)
+        set_filters(sched, data, logger)
         unless data[:parameters].nil? or data[:parameters].empty?
             jobreq[:params] = data[:parameters].keys.join(",")
             jobreq.merge!(data[:parameters])
@@ -218,19 +233,20 @@ post '/mcollective/:agent/:action/' do
     else
         mc = rpcclient(params[:agent])
         mc.discover
-        set_filters(mc, params, logger)
+        set_filters(mc, data, logger)
         if data[:parameters]
             data[:parameters].each  { |name,value| puts "#{name}: #{value}" }
         end
         if data[:limit]
             limits = data[:limit]
-            if limits[:target]
+            if limits[:targets]
                 mc.limit_targets = "#{limits[:targets]}"
             end
             if limits[:method]
                 mc.limit_method = "#{limits[:method]}"
             end
         end
+
         json_response = JSON.dump(mc.send(params[:action], data[:parameters]).map{|r| r.results})
         logger.info "Command Agent: #{params[:agent]} Action: #{params[:action]} executed"
         logger.debug "Response received: #{json_response}"
