@@ -162,7 +162,7 @@ def set_filters(mc, params, logger)
             when :compound
                 logger.debug "Applying compound_filter"
                 logger.debug "compound : #{filter_values}"
-                mc.compound "#{filter_values}"
+                mc.compound_filter "#{filter_values}"
             end
         end
     end
