@@ -157,8 +157,6 @@ def set_filters(mc, params, logger)
             when :identity
                 logger.debug "Applying identity_filter"
                 filter_values.each do |value|
-                    logger.info('Id value :')
-                    logger.info(value)
                     mc.identity_filter "#{value}"
                 end
             when :compound
