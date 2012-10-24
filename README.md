@@ -3,8 +3,10 @@ MCollective (rpc communication).
 
 You can reach MCollective with URLs like :
 
-    POST on http://yourserver:4567/mcollective/rpcutil/ping/ # Sinatra standalone
-    POST on http://yourserver/mcollective/rpcutil/ping/ # Passenger
+```
+POST on http://yourserver:4567/mcollective/rpcutil/ping/ # Sinatra standalone
+POST on http://yourserver/mcollective/rpcutil/ping/ # Passenger
+```
 
 Depending on if you use Sinatra as a standalone service or through Apache and
 Passenger.
