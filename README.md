@@ -14,7 +14,7 @@ Passenger.
 With curl :
 
 ```
-curl -X POST http://yourserver/mcollective/rpcutil/ping/; echo
+curl -X POST -d '' http://yourserver/mcollective/rpcutil/ping/; echo
 ```
 
 
