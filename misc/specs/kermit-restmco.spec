@@ -3,7 +3,7 @@
 Name:      kermit-restmco 
 Summary:   A simple REST server used to communicate with Mcollective 
 Version:   2.0 
-Release:   1%{?dist}
+Release:   2%{?dist}
 License:   GPLv3
 Group:     System Tools 
 #Source0:   %{name}-%{version}.tar.gz 
@@ -35,7 +35,8 @@ install mc-rpc-restserver-control.rb %{buildroot}/usr/local/bin/kermit/restmco
 install misc/service/kermit-restmco %{buildroot}/etc/init.d 
 install misc/sysconfig/kermit-restmco.cfg %{buildroot}/etc/kermit
 install misc/httpd/restmco.conf %{buildroot}/usr/local/bin/kermit/restmco/misc
-install misc/log/kermit-restmco.log %{buildroot}/var/log/ 
+install misc/selinux/kermitrest.te %{buildroot}/usr/local/bin/kermit/restmco/misc
+install misc/log/kermit-restmco.log %{buildroot}/var/log 
 install mc-rpc-restserver.rb %{buildroot}/var/www/restmco
 install passenger/config.ru %{buildroot}/var/www/restmco
 install passenger/tmp/restart.txt %{buildroot}/var/www/restmco/tmp
@@ -52,6 +53,7 @@ mkdir -p /usr/local/bin/kermit/restmco
 %attr(0755, root, root) /usr/local/bin/kermit/restmco/mc-rpc-restserver-control.rb
 /usr/local/bin/kermit/restmco/mc-rpc-restserver.rb
 /usr/local/bin/kermit/restmco/misc/restmco.conf
+/usr/local/bin/kermit/restmco/misc/kermitrest.te
 %attr(0755,root,root) /etc/init.d/kermit-restmco
 %config(noreplace) %attr(0755,root,root) /etc/kermit/kermit-restmco.cfg
 %attr(0644,nobody,nobody) /var/log/kermit-restmco.log
@@ -63,6 +65,8 @@ mkdir -p /usr/local/bin/kermit/restmco
 /var/www/restmco/tmp/restart.txt
 
 %changelog
+* Wed Oct 24 2012 Louis Coilliot
+- Provide selinux module 
 * Wed Oct 24 2012 Louis Coilliot
 - simplified installation for passenger
 * Mon Oct 22 2012 Marco Mornati

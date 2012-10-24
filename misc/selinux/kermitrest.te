@@ -1,0 +1,9 @@
+module kermitrest 1.0.0;
+
+require {
+        type httpd_t;
+            type var_log_t;
+                class file { read write create setattr getattr };
+}
+
+allow httpd_t var_log_t:file { read write create setattr getattr };
