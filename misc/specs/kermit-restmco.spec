@@ -34,10 +34,11 @@ install mc-rpc-restserver.rb %{buildroot}/usr/local/bin/kermit/restmco
 install mc-rpc-restserver-control.rb %{buildroot}/usr/local/bin/kermit/restmco
 install misc/service/kermit-restmco %{buildroot}/etc/init.d 
 install misc/sysconfig/kermit-restmco.cfg %{buildroot}/etc/kermit
+install misc/httpd/restmco.conf %{buildroot}/usr/local/bin/kermit/restmco/misc
 install misc/log/kermit-restmco.log %{buildroot}/var/log/ 
-install misc/httpd.conf %{buildroot}/usr/local/bin/kermit/restmco/misc
-install config.ru %{buildroot}/var/www/restmco
-install restart.txt %{buildroot}/var/www/restmco/tmp
+install mc-rpc-restserver.rb %{buildroot}/var/www/restmco
+install passenger/config.ru %{buildroot}/var/www/restmco
+install passenger/tmp/restart.txt %{buildroot}/var/www/restmco/tmp
 
 
 %clean
@@ -50,11 +51,16 @@ mkdir -p /usr/local/bin/kermit/restmco
 %defattr(0644,root,root,-)
 %attr(0755, root, root) /usr/local/bin/kermit/restmco/mc-rpc-restserver-control.rb
 /usr/local/bin/kermit/restmco/mc-rpc-restserver.rb
-/usr/local/bin/kermit/restmco/misc/httpd.conf
+/usr/local/bin/kermit/restmco/misc/restmco.conf
 %attr(0755,root,root) /etc/init.d/kermit-restmco
 %config(noreplace) %attr(0755,root,root) /etc/kermit/kermit-restmco.cfg
 %attr(0644,nobody,nobody) /var/log/kermit-restmco.log
 %attr(0755,root,root) /var/www/restmco
+/var/www/restmco/mc-rpc-restserver.rb
+/var/www/restmco/config.ru
+%attr(0755,root,root) /var/www/restmco/public
+%attr(0755,root,root) /var/www/restmco/tmp
+/var/www/restmco/tmp/restart.txt
 
 %changelog
 * Wed Oct 24 2012 Louis Coilliot
