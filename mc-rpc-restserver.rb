@@ -32,8 +32,8 @@
 #   compound: value
 # },
 # parameters: {
-#   name: value,
-#   name, value
+#   p1name: value,
+#   p2name: value
 # },
 # schedule: {
 #   schedtype: value,
