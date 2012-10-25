@@ -148,7 +148,7 @@ logger.debug "Starting Kermit-RestMCO"
 def set_filters(mc, params, logger)
     if params[:filters] then
         params[:filters].each do |filter_type, filter_values|
-            logger.debug "#{filter_type}: #{filter_values}"
+            logger.debug "#{filter_type}: #{JSON.dump(filter_values)}"
             case filter_type
             when :class
                 logger.debug "Applying class_filter"
@@ -191,7 +191,7 @@ post '/schedstatus/:jobid/' do
     data = (body_content.nil? or body_content.empty?) ? {} : recursive_symbolize_keys(JSON.parse(body_content))
     set_filters(sched, data, logger)
     json_response = JSON.dump(sched.query(jobreq).map{|r| r.results})
-    logger.info "Command schedstatus #{params[:jobid]} executed on filters #{data[:filters]}"
+    logger.info "Command schedstatus #{params[:jobid]} executed on filters #{JSON.dump(data[:filters])}"
     logger.debug "Response received: #{json_response}"
     json_response
 end
@@ -205,7 +205,7 @@ post '/schedoutput/:jobid/' do
     data = (body_content.nil? or body_content.empty?) ? {} : recursive_symbolize_keys(JSON.parse(body_content))
     set_filters(sched, data, logger)
     json_response = JSON.dump(sched.query(jobreq).map{|r| r.results})
-    logger.info "Command scheoutput #{params[:jobid]} executed on filters: #{data[:filters]}"
+    logger.info "Command scheoutput #{params[:jobid]} executed on filters: #{JSON.dump(data[:filters])}"
     logger.debug "Response received: #{json_response}"
     json_response
 end
