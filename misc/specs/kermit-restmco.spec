@@ -9,6 +9,11 @@ Group:     System Tools
 #Source0:   %{name}-%{version}.tar.gz 
 Source0:   thinkfr-restmco-%{gitrev}.tar.gz 
 Requires:  rubygem-daemons, rubygem-sinatra, mcollective-common, rubygem-inifile
+%if "%dist" == ".el5"
+Requires: selinux-policy-devel
+%else 
+Requires: selinux-policy
+%endif
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 
