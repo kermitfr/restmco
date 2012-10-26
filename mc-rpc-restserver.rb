@@ -148,7 +148,7 @@ logger.debug "Starting Kermit-RestMCO"
 def set_filters(mc, params, logger)
     if params[:filters] then
         params[:filters].each do |filter_type, filter_values|
-            logger.debug "#{filter_type}: #{JSON.dump(filter_values)}"
+            logger.debug "#{filter_type}: #{filter_values.class == Array ? JSON.dump(filter_values) : filter_values}"
             case filter_type
             when :class
                 logger.debug "Applying class_filter"
