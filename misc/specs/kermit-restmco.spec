@@ -9,6 +9,11 @@ Group:     System Tools
 #Source0:   %{name}-%{version}.tar.gz 
 Source0:   thinkfr-restmco-%{gitrev}.tar.gz 
 Requires:  rubygem-daemons, rubygem-sinatra, mcollective-common, rubygem-inifile
+%if "%dist" == ".el5"
+Requires: selinux-policy-devel
+%else 
+Requires: selinux-policy
+%endif
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 
@@ -67,6 +72,8 @@ mkdir -p /usr/local/bin/kermit/restmco
 /var/www/restmco/tmp/restart.txt
 
 %changelog
+* Fri Oct 26 2012 Marco Mornati
+- Requires for selinux
 * Fri Oct 26 2012 Louis Coilliot
 - patch for JSON.dump compat with rb 1.8.7
 * Fri Oct 26 2012 Louis Coilliot
