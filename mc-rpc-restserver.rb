@@ -162,6 +162,9 @@ def set_filters(mc, params, logger)
                 end
             when :agent
                 logger.debug "Applying agent_filter"
+                filter_values.each do |value|
+                    mc.agent_filter "#{value}"
+                end
             when :identity
                 logger.debug "Applying identity_filter"
                 filter_values.each do |value|
