@@ -38,11 +38,13 @@
 # schedule: {
 #   schedtype: value,
 #   schedarg: value
-# }
+# },
 # limit: {
 #   targets: value,
 #   method: value
-# }
+# },
+# timeout: value,
+# discoverytimeout: value
 #}
 #
 # Example 1
@@ -179,6 +181,19 @@ def set_filters(mc, params, logger)
     end
 end
 
+def set_timeout(mc, params, logger)
+    if params[:timeout] then
+       logger.debug "Applying timeout"
+       logger.debug "timeout : #{params[:timeout]}"
+       mc.timeout = params[:timeout]
+    end
+    if params[:discoverytimeout]
+       logger.debug "Applying discovery timeout"
+       logger.debug "discovery timeout : #{params[:discoverytimeout]}"
+       mc.discovery_timeout = params[:discoverytimeout]
+    end
+end
+
 
 get '/' do
     logger.debug "Calling / url"
@@ -243,6 +258,7 @@ post '/mcollective/:agent/:action/' do
         mc = rpcclient(params[:agent])
         mc.discover
         set_filters(mc, data, logger)
+        set_timeout(mc, data, logger)
         if data[:parameters]
             data[:parameters].each  { |name,value| puts "#{name}: #{value}" }
         end
