@@ -3,7 +3,7 @@
 Name:      kermit-restmco 
 Summary:   A simple REST server used to communicate with Mcollective 
 Version:   2.0 
-Release:   4%{?dist}
+Release:   5%{?dist}
 License:   GPLv3
 Group:     System Tools 
 #Source0:   %{name}-%{version}.tar.gz 
@@ -72,6 +72,8 @@ mkdir -p /usr/local/bin/kermit/restmco
 /var/www/restmco/tmp/restart.txt
 
 %changelog
+* Fri Oct 26 2012 Marco Mornati
+- Requires for selinux
 * Fri Oct 26 2012 Louis Coilliot
 - mco agent filter
 * Thu Oct 25 2012 Louis Coilliot
