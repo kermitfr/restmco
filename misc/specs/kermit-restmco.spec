@@ -1,14 +1,11 @@
-%define gitrev b9d4a55
-
-Name:      kermit-restmco 
-Summary:   A simple REST server used to communicate with Mcollective 
-Version:   2.0 
-Release:   5%{?dist}
-License:   GPLv3
-Group:     System Tools 
-#Source0:   %{name}-%{version}.tar.gz 
-Source0:   thinkfr-restmco-%{gitrev}.tar.gz 
-Requires:  rubygem-daemons, rubygem-sinatra, mcollective-common, rubygem-inifile
+Name: kermit-restmco 
+Summary: A simple REST server used to communicate with Mcollective 
+Version: 2.1
+Release: 5%{?dist}
+License: GPLv3
+Group: System Tools 
+Source0: %{name}-%{version}.tar.gz 
+Requires: rubygem-daemons, rubygem-sinatra, mcollective-common, rubygem-inifile
 %if "%dist" == ".el5"
 Requires: selinux-policy-devel
 %else 
@@ -21,7 +18,7 @@ BuildArch: noarch
 A simple REST server in ruby and sinatra, used to communicate with Mcollective 
 
 %prep
-%setup -n thinkfr-restmco-%{gitrev}
+%setup -n %{name}
 
 %build
 
@@ -72,6 +69,8 @@ mkdir -p /usr/local/bin/kermit/restmco
 /var/www/restmco/tmp/restart.txt
 
 %changelog
+* Thu Nov 8 2012 Marco Mornati
+- Changes to use Makefile to build
 * Fri Oct 26 2012 Marco Mornati
 - Requires for selinux
 * Fri Oct 26 2012 Louis Coilliot
