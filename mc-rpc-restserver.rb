@@ -74,7 +74,7 @@
 #
 # Returns all the answers as a JSON document
 
-require 'rubygems'
+require 'rubygems' if RUBY_VERSION < "1.9"
 require 'sinatra'
 require 'mcollective'
 require 'json'
@@ -107,175 +107,179 @@ class Hash
   end
 end
 
-def recursive_symbolize_keys! hash
-    hash.symbolize_keys!
-    hash.values.select{|v| v.is_a? Hash}.each{|h| recursive_symbolize_keys!(h)}
-end
+class KermitRestMCO < Sinatra::Base
 
-def getkey(section, key)
-    ini=IniFile.load('/etc/kermit/kermit-restmco.cfg', :comment => '#')
-    params = ini[section]
-    params[key]
-end
+    set :title, "KermIT RestMCO Server"
 
-#Read Configuration file
-LOG_FILE = getkey('logger', 'LOG_FILE')
-LOG_LEVEL = getkey('logger', 'LOG_LEVEL')
-
-#Create log file if does not exists
-FileUtils.touch LOG_FILE
-FileUtils.chown('nobody', 'nobody', LOG_FILE)
-
-uid = Etc.getpwnam("nobody").uid
-Process::Sys.setuid(uid)
-
-#Create Log file
-logger = Logger.new(STDERR)
-logger = Logger.new(STDOUT)
-logger = Logger.new(LOG_FILE, 'daily')
-
-case LOG_LEVEL
-    when 'DEBUG'
-        logger.level = Logger::DEBUG
-    when 'INFO'
-        logger.level = Logger::INFO
-    when 'WARN'
-        logger.level = Logger::WARN
-    when 'ERROR'
-        logger.level = Logger::ERROR
-end
-
-logger.debug "Starting Kermit-RestMCO"
-
-def set_filters(mc, params, logger)
-    if params[:filters] then
-        params[:filters].each do |filter_type, filter_values|
-            logger.debug "#{filter_type}: #{filter_values.class == Array ? JSON.dump(filter_values) : filter_values}"
-            case filter_type
-            when :class
-                logger.debug "Applying class_filter"
-                filter_values.each do |value|
-                    mc.class_filter "/#{value}/"
+    def recursive_symbolize_keys! hash
+        hash.symbolize_keys!
+        hash.values.select{|v| v.is_a? Hash}.each{|h| recursive_symbolize_keys!(h)}
+    end
+    
+    def set_filters(mc, params)
+        if params[:filters] then
+            params[:filters].each do |filter_type, filter_values|
+                settings.kermit_log.debug "#{filter_type}: #{filter_values.class == Array ? JSON.dump(filter_values) : filter_values}"
+                case filter_type
+                when :class
+                    settings.kermit_log.debug "Applying class_filter"
+                    filter_values.each do |value|
+                        mc.class_filter "/#{value}/"
+                    end
+                when :fact
+                    settings.kermit_log.debug "Applying fact_filter"
+                    filter_values.each do |value|
+                        mc.fact_filter "#{value}"
+                    end
+                when :agent
+                    settings.kermit_log.debug "Applying agent_filter"
+                    filter_values.each do |value|
+                        mc.agent_filter "#{value}"
+                    end
+                when :identity
+                    settings.kermit_log.debug "Applying identity_filter"
+                    filter_values.each do |value|
+                        mc.identity_filter "#{value}"
+                    end
+                when :compound
+                    settings.kermit_log.debug "Applying compound_filter"
+                    settings.kermit_log.debug "compound : #{filter_values}"
+                    mc.compound_filter "#{filter_values}"
                 end
-            when :fact
-                logger.debug "Applying fact_filter"
-                filter_values.each do |value|
-                    mc.fact_filter "#{value}"
-                end
-            when :agent
-                logger.debug "Applying agent_filter"
-                filter_values.each do |value|
-                    mc.agent_filter "#{value}"
-                end
-            when :identity
-                logger.debug "Applying identity_filter"
-                filter_values.each do |value|
-                    mc.identity_filter "#{value}"
-                end
-            when :compound
-                logger.debug "Applying compound_filter"
-                logger.debug "compound : #{filter_values}"
-                mc.compound_filter "#{filter_values}"
             end
         end
     end
-end
-
-def set_timeout(mc, params, logger)
-    if params[:timeout] then
-       logger.debug "Applying timeout"
-       logger.debug "timeout : #{params[:timeout]}"
-       mc.timeout = params[:timeout]
+    
+    def set_timeout(mc, params)
+        if params[:timeout] then
+           settings.kermit_log.debug "Applying timeout"
+           settings.kermit_log.debug "timeout : #{params[:timeout]}"
+           mc.timeout = params[:timeout]
+        end
+        if params[:discoverytimeout]
+           settings.kermit_log.debug "Applying discovery timeout"
+           settings.kermit_log.debug "discovery timeout : #{params[:discoverytimeout]}"
+           mc.discovery_timeout = params[:discoverytimeout]
+        end
     end
-    if params[:discoverytimeout]
-       logger.debug "Applying discovery timeout"
-       logger.debug "discovery timeout : #{params[:discoverytimeout]}"
-       mc.discovery_timeout = params[:discoverytimeout]
+    
+    
+    get '/' do
+        settings.kermit_log.debug "Calling / url"
+        "Hello Sinatra"
     end
-end
-
-
-get '/' do
-    logger.debug "Calling / url"
-    "Hello Sinatra"
-end
-
-post '/schedstatus/:jobid/' do
-    content_type :json
-    logger.debug "Calling /schedstatus url"
-    jobreq = { :jobid => params[:jobid] }
-    sched = rpcclient("scheduler")
-    body_content = request.body.read
-    data = (body_content.nil? or body_content.empty?) ? {} : recursive_symbolize_keys(JSON.parse(body_content))
-    set_filters(sched, data, logger)
-    json_response = JSON.dump(sched.query(jobreq).map{|r| r.results})
-    logger.info "Command schedstatus #{params[:jobid]} executed on filters #{JSON.dump(data[:filters])}"
-    logger.debug "Response received: #{json_response}"
-    json_response
-end
-
-post '/schedoutput/:jobid/' do   
-    content_type :json
-    logger.debug "Calling /schedoutput url"
-    jobreq = { :jobid => params[:jobid], :output => 'yes' }
-    sched = rpcclient("scheduler")
-    body_content = request.body.read
-    data = (body_content.nil? or body_content.empty?) ? {} : recursive_symbolize_keys(JSON.parse(body_content))
-    set_filters(sched, data, logger)
-    json_response = JSON.dump(sched.query(jobreq).map{|r| r.results})
-    logger.info "Command scheoutput #{params[:jobid]} executed on filters: #{JSON.dump(data[:filters])}"
-    logger.debug "Response received: #{json_response}"
-    json_response
-end
-
-post '/mcollective/:agent/:action/' do
-    content_type :json
-    logger.debug "Calling /mcollective url Agent: #{params[:agent]} Action:#{params[:action]}"
-    body_content = request.body.read
-    data = (body_content.nil? or body_content.empty?) ? {} : JSON.parse(body_content)
-    data.recursive_symbolize_keys!
-    logger.debug "JSON Data: #{JSON.dump(data)}"
-    if data[:schedule] then
-        logger.info "Executing with backend scheduler"
-        scheduler_data=data[:schedule]
-        scheduler_data[:schedtype] ||='in'
-        scheduler_data[:schedarg]  ||='0s'
-        jobreq = { :agentname  => params[:agent],
-                   :actionname => params[:action],
-                   :schedtype  => scheduler_data[:schedtype],
-                   :schedarg   => scheduler_data[:schedarg] }
+    
+    post '/schedstatus/:jobid/' do
+        content_type :json
+        settings.kermit_log.debug "Calling /schedstatus url"
+        jobreq = { :jobid => params[:jobid] }
         sched = rpcclient("scheduler")
-        set_filters(sched, data, logger)
-        unless data[:parameters].nil? or data[:parameters].empty?
-            jobreq[:params] = data[:parameters].keys.join(",")
-            jobreq.merge!(data[:parameters])
-        end
-        json_response = JSON.dump(sched.schedule(jobreq).map{|r| r.results})
-        logger.info "Command Agent: #{params[:agent]} Action: #{params[:action]} executed"
-        logger.debug "Response received: #{json_response}"
-        json_response
-    else
-        mc = rpcclient(params[:agent])
-        mc.discover
-        set_filters(mc, data, logger)
-        set_timeout(mc, data, logger)
-        if data[:parameters]
-            data[:parameters].each  { |name,value| puts "#{name}: #{value}" }
-        end
-        if data[:limit]
-            limits = data[:limit]
-            if limits[:targets]
-                mc.limit_targets = "#{limits[:targets]}"
-            end
-            if limits[:method]
-                mc.limit_method = "#{limits[:method]}"
-            end
-        end
-
-        json_response = JSON.dump(mc.send(params[:action], data[:parameters]).map{|r| r.results})
-        logger.info "Command Agent: #{params[:agent]} Action: #{params[:action]} executed"
-        logger.debug "Response received: #{json_response}"
+        body_content = request.body.read
+        data = (body_content.nil? or body_content.empty?) ? {} : recursive_symbolize_keys(JSON.parse(body_content))
+        set_filters(sched, data)
+        json_response = JSON.dump(sched.query(jobreq).map{|r| r.results})
+        settings.kermit_log.info "Command schedstatus #{params[:jobid]} executed on filters #{JSON.dump(data[:filters])}"
+        settings.kermit_log.debug "Response received: #{json_response}"
         json_response
     end
-end
+    
+    post '/schedoutput/:jobid/' do   
+        content_type :json
+        settings.kermit_log.debug "Calling /schedoutput url"
+        jobreq = { :jobid => params[:jobid], :output => 'yes' }
+        sched = rpcclient("scheduler")
+        body_content = request.body.read
+        data = (body_content.nil? or body_content.empty?) ? {} : recursive_symbolize_keys(JSON.parse(body_content))
+        set_filters(sched, data)
+        json_response = JSON.dump(sched.query(jobreq).map{|r| r.results})
+        settings.kermit_log.info "Command scheoutput #{params[:jobid]} executed on filters: #{JSON.dump(data[:filters])}"
+        settings.kermit_log.debug "Response received: #{json_response}"
+        json_response
+    end
+    
+    post '/mcollective/:agent/:action/' do
+        content_type :json
+        settings.kermit_log.debug "Calling /mcollective url Agent: #{params[:agent]} Action:#{params[:action]}"
+        body_content = request.body.read
+        data = (body_content.nil? or body_content.empty?) ? {} : JSON.parse(body_content)
+        data.recursive_symbolize_keys!
+        settings.kermit_log.debug "JSON Data: #{JSON.dump(data)}"
+        if data[:schedule] then
+            settings.kermit_log.info "Executing with backend scheduler"
+            scheduler_data=data[:schedule]
+            scheduler_data[:schedtype] ||='in'
+            scheduler_data[:schedarg]  ||='0s'
+            jobreq = { :agentname  => params[:agent],
+                       :actionname => params[:action],
+                       :schedtype  => scheduler_data[:schedtype],
+                       :schedarg   => scheduler_data[:schedarg] }
+            sched = rpcclient("scheduler")
+            set_filters(sched, data)
+            unless data[:parameters].nil? or data[:parameters].empty?
+                jobreq[:params] = data[:parameters].keys.join(",")
+                jobreq.merge!(data[:parameters])
+            end
+            json_response = JSON.dump(sched.schedule(jobreq).map{|r| r.results})
+            settings.kermit_log.info "Command Agent: #{params[:agent]} Action: #{params[:action]} executed"
+            settings.kermit_log.debug "Response received: #{json_response}"
+            json_response
+        else
+            mc = rpcclient(params[:agent])
+            mc.discover
+            set_filters(mc, data)
+            set_timeout(mc, data)
+            if data[:parameters]
+                data[:parameters].each  { |name,value| puts "#{name}: #{value}" }
+            end
+            if data[:limit]
+                limits = data[:limit]
+                if limits[:targets]
+                    mc.limit_targets = "#{limits[:targets]}"
+                end
+                if limits[:method]
+                    mc.limit_method = "#{limits[:method]}"
+                end
+            end
+    
+            json_response = JSON.dump(mc.send(params[:action], data[:parameters]).map{|r| r.results})
+            settings.kermit_log.info "Command Agent: #{params[:agent]} Action: #{params[:action]} executed"
+            settings.kermit_log.debug "Response received: #{json_response}"
+            json_response
+        end
+    end
+end 
 
+if __FILE__ == $0
+    def getkey(section, key)
+        ini=IniFile.load('/etc/kermit/kermit-restmco.cfg', :comment => '#')
+        params = ini[section]
+        params[key]
+    end
+    
+    #Read Configuration file
+    LOG_FILE = getkey('logger', 'LOG_FILE')
+    LOG_LEVEL = getkey('logger', 'LOG_LEVEL')
+
+    #Create log file if does not exists
+    FileUtils.touch LOG_FILE
+    FileUtils.chown('nobody', 'nobody', LOG_FILE)
+
+    #Create Log file
+    kermit_log = Logger.new(LOG_FILE)
+
+    case LOG_LEVEL
+        when 'DEBUG'
+            kermit_log.level = Logger::DEBUG
+        when 'INFO'
+            kermit_log.level = Logger::INFO
+        when 'WARN'
+            kermit_log.level = Logger::WARN
+        when 'ERROR'
+            kermit_log.level = Logger::ERROR
+    end
+
+    kermit_log.info "KermIT RestMCO Server started @ " + Time.now.to_s
+    KermitRestMCO.set :kermit_log, kermit_log
+    KermitRestMCO.run!
+    kermit_log.info "KermIT RestMCO stopped @ " + Time.now.to_s
+end
