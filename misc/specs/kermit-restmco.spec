@@ -1,7 +1,7 @@
 Name: kermit-restmco 
 Summary: A simple REST server used to communicate with Mcollective 
 Version: 2.1
-Release: 5%{?dist}
+Release: 1%{?dist}
 License: GPLv3
 Group: System Tools 
 Source0: %{name}-%{version}.tar.gz 
