@@ -82,7 +82,12 @@ require 'logger'
 require 'inifile'
 require 'fileutils'
 
-include MCollective::RPC
+MCO_CONFIG = '/etc/mcollective/client.cfg'
+MCO_TIMEOUT = 5
+MCO_DISCOVTMOUT = 1
+MCO_DEBUG = false
+MCO_COLLECTIVE = nil
+
 
 class Hash
   def symbolize_keys
@@ -224,7 +229,23 @@ class KermitRestMCO < Sinatra::Base
             settings.kermit_log.debug "Response received: #{json_response}"
             json_response
         else
-            mc = rpcclient(params[:agent])
+            begin
+                mc = MCollective::RPC::Client.new(params[:agent], \
+                    :configfile => MCO_CONFIG,
+                    :options => {
+                    :verbose      => false,
+                    :progress_bar => false,
+                    :timeout      => MCO_TIMEOUT,
+                    :config       => MCO_CONFIG,
+                    :filter       => MCollective::Util.empty_filter,
+                    :collective   => MCO_COLLECTIVE,
+                    :disctimeout  => MCO_DISCOVTMOUT } )
+            rescue Exception => e
+                settings.kermit_log.error e.message
+            end
+            if mc.nil?
+                return JSON.dump([{"sender"=>"ERROR","statuscode"=>1,"statusmsg"=>"ERROR","data"=>{"message"=>e.message}}])
+            end
             mc.discover
             set_filters(mc, data)
             set_timeout(mc, data)
