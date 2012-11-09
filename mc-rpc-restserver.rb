@@ -83,10 +83,20 @@ require 'inifile'
 require 'fileutils'
 
 MCO_CONFIG = '/etc/mcollective/client.cfg'
-MCO_TIMEOUT = 5
-MCO_DISCOVTMOUT = 1
+MCO_TIMEOUT = 10 
+MCO_DISCOVTMOUT = 10
 MCO_DEBUG = false
 MCO_COLLECTIVE = nil
+
+MCO_OPTS = {
+    :verbose      => false,
+    :progress_bar => false,
+    :timeout      => MCO_TIMEOUT,
+    :config       => MCO_CONFIG,
+    :filter       => MCollective::Util.empty_filter,
+    :collective   => MCO_COLLECTIVE,
+    :disctimeout  => MCO_DISCOVTMOUT
+}
 
 
 class Hash
@@ -178,7 +188,14 @@ class KermitRestMCO < Sinatra::Base
         content_type :json
         settings.kermit_log.debug "Calling /schedstatus url"
         jobreq = { :jobid => params[:jobid] }
-        sched = rpcclient("scheduler")
+        begin
+            sched = MCollective::RPC::Client.new("scheduler", :configfile => MCO_CONFIG, :options => MCO_OPTS )
+        rescue Exception => e
+            settings.kermit_log.error e.message
+        end
+        if sched.nil?
+            return JSON.dump([{"sender"=>"ERROR","statuscode"=>1,"statusmsg"=>"ERROR","data"=>{"message"=>e.message}}])
+        end
         body_content = request.body.read
         data = (body_content.nil? or body_content.empty?) ? {} : recursive_symbolize_keys(JSON.parse(body_content))
         set_filters(sched, data)
@@ -192,7 +209,14 @@ class KermitRestMCO < Sinatra::Base
         content_type :json
         settings.kermit_log.debug "Calling /schedoutput url"
         jobreq = { :jobid => params[:jobid], :output => 'yes' }
-        sched = rpcclient("scheduler")
+        begin
+            sched = MCollective::RPC::Client.new("scheduler", :configfile => MCO_CONFIG, :options => MCO_OPTS )
+        rescue Exception => e
+            settings.kermit_log.error e.message
+        end
+        if sched.nil?
+            return JSON.dump([{"sender"=>"ERROR","statuscode"=>1,"statusmsg"=>"ERROR","data"=>{"message"=>e.message}}])
+        end
         body_content = request.body.read
         data = (body_content.nil? or body_content.empty?) ? {} : recursive_symbolize_keys(JSON.parse(body_content))
         set_filters(sched, data)
@@ -218,7 +242,15 @@ class KermitRestMCO < Sinatra::Base
                        :actionname => params[:action],
                        :schedtype  => scheduler_data[:schedtype],
                        :schedarg   => scheduler_data[:schedarg] }
-            sched = rpcclient("scheduler")
+            begin
+                sched = MCollective::RPC::Client.new("scheduler", :configfile => MCO_CONFIG, :options => MCO_OPTS )
+            rescue Exception => e
+                settings.kermit_log.error e.message
+            end
+            if sched.nil?
+                return JSON.dump([{"sender"=>"ERROR","statuscode"=>1,"statusmsg"=>"ERROR","data"=>{"message"=>e.message}}])
+            end
+
             set_filters(sched, data)
             unless data[:parameters].nil? or data[:parameters].empty?
                 jobreq[:params] = data[:parameters].keys.join(",")
@@ -230,16 +262,7 @@ class KermitRestMCO < Sinatra::Base
             json_response
         else
             begin
-                mc = MCollective::RPC::Client.new(params[:agent], \
-                    :configfile => MCO_CONFIG,
-                    :options => {
-                    :verbose      => false,
-                    :progress_bar => false,
-                    :timeout      => MCO_TIMEOUT,
-                    :config       => MCO_CONFIG,
-                    :filter       => MCollective::Util.empty_filter,
-                    :collective   => MCO_COLLECTIVE,
-                    :disctimeout  => MCO_DISCOVTMOUT } )
+                mc = MCollective::RPC::Client.new(params[:agent], :configfile => MCO_CONFIG, :options => MCO_OPTS )
             rescue Exception => e
                 settings.kermit_log.error e.message
             end
