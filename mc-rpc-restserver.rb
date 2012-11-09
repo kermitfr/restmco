@@ -187,7 +187,6 @@ class KermitRestMCO < Sinatra::Base
                         :config       => MCO_CONFIG,
                         :filter       => MCollective::Util.empty_filter,
                         :collective   => MCO_COLLECTIVE,
-                        :disctimeout  => MCO_DISCOVTMOUT     
                 })
         rescue Exception => e
             settings.kermit_log.error e.message
@@ -218,7 +217,6 @@ class KermitRestMCO < Sinatra::Base
                         :config       => MCO_CONFIG,
                         :filter       => MCollective::Util.empty_filter,
                         :collective   => MCO_COLLECTIVE,
-                        :disctimeout  => MCO_DISCOVTMOUT
                     } )
         rescue Exception => e
             settings.kermit_log.error e.message
@@ -261,7 +259,6 @@ class KermitRestMCO < Sinatra::Base
                             :config       => MCO_CONFIG,
                             :filter       => MCollective::Util.empty_filter,
                             :collective   => MCO_COLLECTIVE,
-                            :disctimeout  => MCO_DISCOVTMOUT
                         } )
             rescue Exception => e
                 settings.kermit_log.error e.message
@@ -290,7 +287,6 @@ class KermitRestMCO < Sinatra::Base
                         :config       => MCO_CONFIG,
                         :filter       => MCollective::Util.empty_filter,
                         :collective   => MCO_COLLECTIVE,
-                        :disctimeout  => MCO_DISCOVTMOUT
                     })
             rescue Exception => e
                 settings.kermit_log.error e.message
