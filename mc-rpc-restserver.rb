@@ -84,20 +84,9 @@ require 'fileutils'
 
 MCO_CONFIG = '/etc/mcollective/client.cfg'
 MCO_TIMEOUT = 10 
-MCO_DISCOVTMOUT = 10
+MCO_DISCOVTMOUT = 4
 MCO_DEBUG = false
 MCO_COLLECTIVE = nil
-
-MCO_OPTS = {
-    :verbose      => false,
-    :progress_bar => false,
-    :timeout      => MCO_TIMEOUT,
-    :config       => MCO_CONFIG,
-    :filter       => MCollective::Util.empty_filter,
-    :collective   => MCO_COLLECTIVE,
-    :disctimeout  => MCO_DISCOVTMOUT
-}
-
 
 class Hash
   def symbolize_keys
@@ -189,7 +178,17 @@ class KermitRestMCO < Sinatra::Base
         settings.kermit_log.debug "Calling /schedstatus url"
         jobreq = { :jobid => params[:jobid] }
         begin
-            sched = MCollective::RPC::Client.new("scheduler", :configfile => MCO_CONFIG, :options => MCO_OPTS )
+            sched = MCollective::RPC::Client.new("scheduler", 
+                :configfile => MCO_CONFIG, 
+                :options => {
+                        :verbose      => false,
+                        :progress_bar => false,
+                        :timeout      => MCO_TIMEOUT,
+                        :config       => MCO_CONFIG,
+                        :filter       => MCollective::Util.empty_filter,
+                        :collective   => MCO_COLLECTIVE,
+                        :disctimeout  => MCO_DISCOVTMOUT     
+                })
         rescue Exception => e
             settings.kermit_log.error e.message
         end
@@ -210,7 +209,17 @@ class KermitRestMCO < Sinatra::Base
         settings.kermit_log.debug "Calling /schedoutput url"
         jobreq = { :jobid => params[:jobid], :output => 'yes' }
         begin
-            sched = MCollective::RPC::Client.new("scheduler", :configfile => MCO_CONFIG, :options => MCO_OPTS )
+            sched = MCollective::RPC::Client.new("scheduler", 
+                    :configfile => MCO_CONFIG, 
+                    :options => {
+                        :verbose      => false,
+                        :progress_bar => false,
+                        :timeout      => MCO_TIMEOUT,
+                        :config       => MCO_CONFIG,
+                        :filter       => MCollective::Util.empty_filter,
+                        :collective   => MCO_COLLECTIVE,
+                        :disctimeout  => MCO_DISCOVTMOUT
+                    } )
         rescue Exception => e
             settings.kermit_log.error e.message
         end
@@ -243,7 +252,17 @@ class KermitRestMCO < Sinatra::Base
                        :schedtype  => scheduler_data[:schedtype],
                        :schedarg   => scheduler_data[:schedarg] }
             begin
-                sched = MCollective::RPC::Client.new("scheduler", :configfile => MCO_CONFIG, :options => MCO_OPTS )
+                sched = MCollective::RPC::Client.new("scheduler", 
+                        :configfile => MCO_CONFIG, 
+                        :options => {
+                            :verbose      => false,
+                            :progress_bar => false,
+                            :timeout      => MCO_TIMEOUT,
+                            :config       => MCO_CONFIG,
+                            :filter       => MCollective::Util.empty_filter,
+                            :collective   => MCO_COLLECTIVE,
+                            :disctimeout  => MCO_DISCOVTMOUT
+                        } )
             rescue Exception => e
                 settings.kermit_log.error e.message
             end
@@ -262,7 +281,17 @@ class KermitRestMCO < Sinatra::Base
             json_response
         else
             begin
-                mc = MCollective::RPC::Client.new(params[:agent], :configfile => MCO_CONFIG, :options => MCO_OPTS )
+                mc = MCollective::RPC::Client.new(params[:agent], 
+                    :configfile => MCO_CONFIG, 
+                    :options => {
+                        :verbose      => false,
+                        :progress_bar => false,
+                        :timeout      => MCO_TIMEOUT,
+                        :config       => MCO_CONFIG,
+                        :filter       => MCollective::Util.empty_filter,
+                        :collective   => MCO_COLLECTIVE,
+                        :disctimeout  => MCO_DISCOVTMOUT
+                    })
             rescue Exception => e
                 settings.kermit_log.error e.message
             end
