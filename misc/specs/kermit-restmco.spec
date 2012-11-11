@@ -1,6 +1,6 @@
 Name: kermit-restmco 
 Summary: A simple REST server used to communicate with Mcollective 
-Version: 2.1
+Version: 2.2
 Release: 1%{?dist}
 License: GPLv3
 Group: System Tools 
@@ -69,6 +69,8 @@ mkdir -p /usr/local/bin/kermit/restmco
 /var/www/restmco/tmp/restart.txt
 
 %changelog
+* Sun Nov 11 2012 Louis Coilliot
+- new method for calling mco rpcclient
 * Thu Nov 8 2012 Marco Mornati
 - Changes to use Makefile to build
 * Fri Oct 26 2012 Marco Mornati
