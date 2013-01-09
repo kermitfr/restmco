@@ -17,7 +17,7 @@ end
 LOG_FILE = getkey('logger', 'LOG_FILE')
 LOG_LEVEL = getkey('logger', 'LOG_LEVEL')
 
-#Create log file if does not exists
+#Create log file if does not exist
 FileUtils.touch LOG_FILE
 FileUtils.chown('nobody', 'nobody', LOG_FILE)
 
